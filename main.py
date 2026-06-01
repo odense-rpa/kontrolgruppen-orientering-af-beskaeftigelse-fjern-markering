@@ -44,12 +44,7 @@ async def populate_queue(workqueue: Workqueue):
         {
             "customFilter": "active",
             "fieldName": "tags/id",
-            "values": [
-                None,
-                None,
-                None,
-                None,
-                tag["id"]],
+            "values": [None, None, None, None, tag["id"]],
         }
     ]
     borgere = momentum.borgere.hent_borgere(filters=filters)
@@ -67,7 +62,10 @@ async def process_workqueue(workqueue: Workqueue):
         liste_af_skabelons_id = []
         skabeloner = await sbsys.sagsskabeloner.hent_sagsskabeloner()
         for sagstitel in SAGSTITLER:
-            skabelon = next((s for s in skabeloner if s["SagsTitel"].lower() == sagstitel.lower()), None)
+            skabelon = next(
+                (s for s in skabeloner if s["SagsTitel"].lower() == sagstitel.lower()),
+                None,
+            )
             if skabelon:
                 liste_af_skabelons_id.append(skabelon["Id"])
             else:
@@ -85,16 +83,10 @@ async def process_workqueue(workqueue: Workqueue):
 
                     aktive_sager = await sbsys.sager.søg_sager(
                         {
-                            "SagsStatusIds": [
-                                6
-                            ],
-                            "PrimaerPerson":{
-                                "CprNummer":cpr
-                            },
-                            "SagsSkabeloner":
-                                liste_af_skabelons_id
+                            "SagsStatusIds": [6],
+                            "PrimaerPerson": {"CprNummer": cpr},
+                            "SagsSkabeloner": liste_af_skabelons_id,
                         }
- 
                     )
 
                     if aktive_sager:
@@ -104,14 +96,18 @@ async def process_workqueue(workqueue: Workqueue):
                     borgers_markeringer = momentum.borgere.hent_markeringer(borger)
                     markering = next(
                         (
-                            m for m in borgers_markeringer
-                            if m["tag"]["title"].lower() == MARKERINGSNAVN.lower() and m["end"] is None
+                            m
+                            for m in borgers_markeringer
+                            if m["tag"]["title"].lower() == MARKERINGSNAVN.lower()
+                            and m["end"] is None
                         ),
                         None,
                     )
 
                     if markering:
-                        momentum.borgere.afslut_markering(markering, datetime.datetime.today())
+                        momentum.borgere.afslut_markering(
+                            markering, datetime.datetime.today()
+                        )
                         tracker.track_task(proces_navn)
 
                 except WorkItemError as e:
