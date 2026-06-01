@@ -111,10 +111,7 @@ async def process_workqueue(workqueue: Workqueue):
                     )
 
                     if markering:
-                        momentum.borgere.afslut_markering(
-                            markering=markering,
-                            slut_dato=datetime.datetime.today(),
-                        )
+                        momentum.borgere.afslut_markering(markering, datetime.datetime.today())
                         tracker.track_task(proces_navn)
 
                 except WorkItemError as e:
